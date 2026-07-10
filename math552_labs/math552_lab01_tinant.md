@@ -17,7 +17,7 @@
 2. In a blank Python cell, run the following code to prove to me that your
    Python is working.
 
-```Python
+```python
 import sys
 import os
 
@@ -29,17 +29,17 @@ print(os.getcwd())
    Before loading the data, check (from above) your working directory. If your
    working directory is Math 452_552 use:
 
-```Python
+```python
 import pandas as pd
 
-gss = pd.read_csv("data/gss_bayes.csv", index_col=0)
+gss = pd.read_csv("../data/gss_bayes.csv", index_col=0)
 gss.head()
 ```
 
 Otherwise, if your notebook is saved in a subfolder such as Lab or Labs, your
 working directory should be that folder so use:
 
-```Python
+```python
 import pandas as pd
 
 gss = pd.read_csv("../data/gss_bayes.csv", index_col=0)
@@ -54,7 +54,7 @@ The ../ means go up one directory before looking for the data folder.
 
 Run each command in a separate Python cell.
 
-```Python
+```python
 gss.columns
 gss.shape
 gss.describe()
@@ -72,7 +72,7 @@ gss['age'].describe()
 
 - Estimate the probability that a randomly selected respondent is female.
 
-```Python
+```python
 p_female = (gss['sex'] == 2).mean()
 print(p_female)
 ```
@@ -91,7 +91,7 @@ print(p_female)
 
 - Create a histogram of age.
 
-```Python
+```python
 import matplotlib.pyplot as plt
 
 gss["age"].hist(bins=20)
