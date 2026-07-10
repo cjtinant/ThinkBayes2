@@ -71,3 +71,11 @@ blocks (` ```python ... ``` `) — jupytext treats those as code cells and
 everything else as markdown/prose cells. A file that's mostly prose with inline
 code snippets (not fenced) will convert into one large markdown cell rather than
 separate runnable code cells.
+
+**Gotcha: the language tag must be lowercase and exact.** Jupytext only splits a
+fenced block into an executable code cell when the tag matches the notebook's
+kernel language exactly — `python`, not `Python`. This is easy to miss after
+cleaning up a `pdftotext` extraction by hand, since capitalizing "Python" reads
+naturally in prose. If a converted notebook comes out as one giant markdown cell
+instead of separate code/text cells, check for this first:
+`grep '```Python' yourfile.md` and lowercase any matches before reconverting.
