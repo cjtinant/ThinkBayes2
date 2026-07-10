@@ -1,0 +1,116 @@
+# Math552 - Lab 1
+
+## 2026-08-28
+
+## Jason Tinant
+
+## Objectives
+
+- Learn the basic Jupyter Notebook workflow.
+- Load data into a pandas DataFrame.
+- Estimate simple probabilities from real data.
+- Create a simple graph.
+
+## Verify setup
+
+1. Open a Jupyter notebook using the shortcut you created.
+2. In a blank Python cell, run the following code to prove to me that your
+   Python is working.
+
+```Python
+import sys
+import os
+
+print(sys.executable)
+print(os.getcwd())
+```
+
+3. Load the General Social Survey data and display the first five observations.
+   Before loading the data, check (from above) your working directory. If your
+   working directory is Math 452_552 use:
+
+```Python
+import pandas as pd
+
+gss = pd.read_csv("data/gss_bayes.csv", index_col=0)
+gss.head()
+```
+
+Otherwise, if your notebook is saved in a subfolder such as Lab or Labs, your
+working directory should be that folder so use:
+
+```Python
+import pandas as pd
+
+gss = pd.read_csv("../data/gss_bayes.csv", index_col=0)
+gss.head()
+```
+
+The ../ means go up one directory before looking for the data folder.
+
+4. Run the pandas command gss.info(). Explain the output.
+
+## Data Exploration
+
+Run each command in a separate Python cell.
+
+```Python
+gss.columns
+gss.shape
+gss.describe()
+gss['sex'].value_counts()
+gss['age'].describe()
+```
+
+1. How many variables are there?
+2. What does describe() tell you?
+3. Is sex numeric or categorical? Explain.
+4. What does value_counts() do?
+5. Run the command gss.isna().sum(). Which variables contain missing values?
+
+## Probability Estimation
+
+- Estimate the probability that a randomly selected respondent is female.
+
+```Python
+p_female = (gss['sex'] == 2).mean()
+print(p_female)
+```
+
+- Why does .mean() compute a probability?
+- Estimate the probability a respondent is over age 50.
+- Estimate the probability that a randomly selected respondent is female and
+  over age 50.
+- What is the probability that someone is over 50 given they are female? (Hint:
+  this is a conditional probability)
+- Is the previous probability the same as the probability that someone is female
+  given they are over 50? Explain.
+- What is the probability that someone is over 50 given they are male?
+
+## Plotting
+
+- Create a histogram of age.
+
+```Python
+import matplotlib.pyplot as plt
+
+gss["age"].hist(bins=20)
+
+plt.xlabel("Age")
+plt.ylabel("Frequency")
+plt.title("Distribution of Respondent Age")
+plt.show()
+```
+
+- Describe the shape of the age distribution.
+- Is it symmetric? Skewed? Are there any unusual features?
+
+## Reflection
+
+In two or three sentences, describe one thing you learned about Jupyter Notebook
+and one thing you learned about estimating probabilities from data.
+
+## Deliverable
+
+After completing this lab, generate a .pdf file and upload it to the dropbox on
+D2L.
