@@ -70,6 +70,8 @@ hand:
 jupytext --sync notes/chap01_ans.ipynb
 ```
 
+jupytext --sync notes/chap02_ans.ipynb
+
 This reads whichever paired file was most recently modified and updates the
 other to match. Run it after each editing session, or before committing, rather
 than assuming it happens automatically.

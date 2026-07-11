@@ -18,10 +18,12 @@ You can order print and ebook versions of *Think Bayes 2e* from
 [Amazon](https://amzn.to/334eqGo).
 
 
-# Bayes's Theorem
+# Chapter 2 - Bayes's Theorem
 
 
-### Feedback and Notes
+## CJT Feedback and Notes
+
+**Note:** These are suggestions not proscriptions.
 
 ### Priors given a SD Mines engineering grad then done some things
 
