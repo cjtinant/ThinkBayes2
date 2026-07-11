@@ -20,7 +20,8 @@ This gives plain text, not real markdown — expect to hand-edit afterward:
 - Add `#`/`##` headers where the original used bold/section titles.
 - Fix code blocks: `pdftotext` sometimes collapses multiple lines onto one (e.g.
   `import sys import os` instead of two separate lines) — restore proper line
-  breaks and wrap in triple-backtick fences (` ```Python `).
+  breaks and wrap in triple-backtick fences (` ```python `, lowercase — see the
+  gotcha at the end of section 3).
 - Rebuild bullet lists: multi-line bullet sections sometimes flatten into a
   single paragraph with inline `-` separators — split back into a real markdown
   list.
@@ -57,8 +58,21 @@ jupytext --set-formats ipynb,md notes/chap01_ans.ipynb
 ```
 
 This creates `chap01_ans.md` alongside `chap01_ans.ipynb` and writes a small
-metadata block into the notebook linking the two. From here, opening either file
-in Positron and editing/running it keeps both in sync automatically.
+metadata block into the notebook linking the two.
+
+**Sync is manual in Positron.** Automatic two-way sync only happens inside
+JupyterLab with the jupytext extension active. Positron's notebook editor
+doesn't have that live integration — saving a notebook there just writes the
+`.ipynb`, without touching the paired `.md`. After editing in Positron, sync by
+hand:
+
+```zsh
+jupytext --sync notes/chap01_ans.ipynb
+```
+
+This reads whichever paired file was most recently modified and updates the
+other to match. Run it after each editing session, or before committing, rather
+than assuming it happens automatically.
 
 **Converting a plain markdown file into a notebook (one-off, no pairing):**
 
