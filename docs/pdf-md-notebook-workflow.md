@@ -54,10 +54,10 @@ pip install jupytext
 **Pair an existing notebook:**
 
 ```zsh
-jupytext --set-formats ipynb,md notes/chap01_ans.ipynb
+jupytext --set-formats ipynb,md notes/chap03_ans.ipynb
 ```
 
-This creates `chap01_ans.md` alongside `chap01_ans.ipynb` and writes a small
+This creates `chap03_ans.md` alongside `chap03_ans.ipynb` and writes a small
 metadata block into the notebook linking the two.
 
 **Sync is manual in Positron.** Automatic two-way sync only happens inside
@@ -67,10 +67,8 @@ doesn't have that live integration — saving a notebook there just writes the
 hand:
 
 ```zsh
-jupytext --sync notes/chap01_ans.ipynb
+jupytext --sync notes/chap03_ans.ipynb
 ```
-
-jupytext --sync notes/chap02_ans.ipynb
 
 This reads whichever paired file was most recently modified and updates the
 other to match. Run it after each editing session, or before committing, rather
