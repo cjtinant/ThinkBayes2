@@ -68,3 +68,4 @@ scratch.md
 # ---- machine-specific R config (contains local paths) ----
 .Renviron
 .Renviron.kyle
+math552_lab02_bayesian-updating_v01.Rmd
