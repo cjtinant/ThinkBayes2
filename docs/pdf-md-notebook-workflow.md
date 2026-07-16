@@ -28,6 +28,27 @@ This gives plain text, not real markdown — expect to hand-edit afterward:
 
 Rename `output.txt` to `output.md` once cleaned up.
 
+## 1a. PDF to markdown with pymupdf4llm
+
+To install:
+
+```zsh
+python3 -m venv ~/.venvs/pdf2md
+source ~/.venvs/pdf2md/bin/activate
+pip install --upgrade pip
+pip install pymupdf4llm
+```
+
+To convert a file:
+
+```zsh
+python3 -c "
+import pymupdf4llm
+md = pymupdf4llm.to_markdown('03_data/raw/SDSMT_CEE140_schedule_26Sp.pdf')
+open('03_data/processed/SDSMT_CEE140_schedule_26Sp.md', 'w').write(md)
+"
+```
+
 ## 2. Running the .md file in Positron
 
 Positron opens `.md` files directly. Code blocks with a language tag
