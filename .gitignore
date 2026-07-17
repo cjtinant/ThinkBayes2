@@ -69,3 +69,6 @@ scratch.md
 .Renviron
 .Renviron.kyle
 math552_lab02_bayesian-updating_v01.Rmd
+
+# ---- rendered labs ----
+math552_labs/*.pdf

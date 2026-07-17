@@ -1,0 +1,550 @@
+---
+title: "Bayesian Updating"
+author: "Kyle Caudle"
+date: "2026-08-24"
+output:
+  pdf_document:
+    latex_engine: xelatex
+header-includes:
+  - |
+    \usepackage[most]{tcolorbox}
+
+    % Colors follow the Okabe-Ito / Wong colorblind-safe qualitative palette
+    % (Okabe & Ito, 2002; Wong, B. "Points of view: Color blindness."
+    % Nature Methods 8, 441 (2011). doi:10.1038/nmeth.1618). These hues were
+    % selected to remain distinguishable under all three common forms of
+    % color vision deficiency -- unlike the original red/green pairing.
+    % See CHANGELOG below for the box-to-color mapping and what's still
+    % pending.
+    \definecolor{wongorange}{HTML}{E69F00}
+    \definecolor{wongblue}{HTML}{0072B2}
+    \definecolor{wonggreen}{HTML}{009E73}
+    \definecolor{wongvermillion}{HTML}{D55E00}
+
+    \newtcolorbox{keyidea}{
+      breakable,
+      colback=wongorange!5!white,
+      colframe=wongorange!70!black,
+      title=Key Takeaway,
+      fonttitle=\bfseries,
+      boxrule=0.8pt,
+      arc=2mm,
+      left=2mm,
+      right=2mm,
+      top=1mm,
+      bottom=1mm
+    }
+
+    \newtcolorbox{definitionbox}{
+      breakable,
+      colback=wongblue!7!white,
+      colframe=wongblue!65!black,
+      title=Definition,
+      fonttitle=\bfseries,
+      boxrule=0.8pt,
+      arc=2mm,
+      left=2mm,
+      right=2mm,
+      top=1mm,
+      bottom=1mm
+    }
+
+    \newtcolorbox{examplebox}{
+      breakable,
+      colback=wonggreen!5!white,
+      colframe=wonggreen!55!black,
+      title=Example,
+      fonttitle=\bfseries,
+      boxrule=0.8pt,
+      arc=2mm,
+      left=2mm,
+      right=2mm,
+      top=1mm,
+      bottom=1mm
+    }
+
+    \newtcolorbox{warningbox}{
+      breakable,
+      colback=wongvermillion!4!white,
+      colframe=wongvermillion!65!black,
+      title=Important Distinction,
+      fonttitle=\bfseries,
+      boxrule=0.8pt,
+      arc=2mm,
+      left=2mm,
+      right=2mm,
+      top=1mm,
+      bottom=1mm
+    }
+---
+
+<!--
+CHANGELOG (v02, working copy — cjt)
+
+2026-07-16: Removed the hardcoded Windows path to Anaconda Python in the setup chunk.
+  It only resolved on a single machine, so the file couldn't knit elsewhere.
+  Replaced with a check for the RETICULATE_PYTHON environment variable,
+  which each person sets once in their own local, untracked .Renviron file
+  (project root).
+2026-07-16: Replaced the hardcoded Windows path to the Bayesian updating
+  figure with knitr::include_graphics(here::here("Images", "Bayes_updating.png")).
+  here() resolves relative to the project root (wherever math552_labs.Rproj
+  lives), so the path works regardless of machine or working directory.
+  Requires the `here` package. Image extracted from page 1 of the original pdf.
+2026-07-16: Sized down the figure (out.width="75%", centered) — was rendering
+  too large in the pdf. Adjust out.width if you want it bigger/smaller.
+2026-07-16: Reflowed markdown prose paragraphs to wrap at 80 chars (code
+  chunks, YAML, tables, and \begin/\end/\item LaTeX lines were left alone).
+  This was a one-time pass, not automatic. To reflow a paragraph you edit
+  later:
+    RStudio: place cursor in the paragraph, Code > Reflow Comment
+      (Cmd+Shift+/ on Mac, Ctrl+Shift+/ on Windows/Linux). Wrap width comes
+      from Tools > Global Options > Code > Display > Margin Column (set to
+      80).
+    Positron: install the "Rewrap" extension (Extensions pane, search
+      "Rewrap"; served via Posit's package manager/Open VSX). Set
+      rewrap.wrappingColumn to 80 in settings, then place cursor in the
+      paragraph and run it (default keybinding Alt+Q). Not yet verified on
+      this file's mix of knitr chunks and raw LaTeX boxes — test on one
+      paragraph before trusting it on the whole document.
+
+2026-07-16: Replaced all four tcolorbox colors with values from the
+  Okabe-Ito / Wong colorblind-safe qualitative palette (Okabe & Ito, 2002;
+  Wong, B. "Points of view: Color blindness." Nature Methods 8, 441 (2011).
+  doi:10.1038/nmeth.1618). This palette is the standard reference for
+  scientific/educational figures because its colors stay distinguishable
+  under all three common forms of color vision deficiency, which the
+  original red/green pairing did not.
+    Key Takeaway            -> #E69F00 (orange)
+    Definition              -> #0072B2 (blue)
+    Example                 -> #009E73 (bluish green)
+    Important Distinction   -> #D55E00 (vermillion)
+2026-07-16: Fixed two related errors when knitting in Positron (worked fine
+  in RStudio). Root cause for both: R only reads .Renviron from the working
+  directory at session *startup*, and Positron's R session appears to start
+  in the ThinkBayes2 root rather than math552_labs/ (confirmed via
+  here()'s own "here() starts at ..." message pointing at the wrong
+  folder). RStudio doesn't hit this because opening math552_labs.Rproj
+  directly starts R with math552_labs/ as the working directory.
+    (1) RETICULATE_PYTHON not set: fixed pragmatically by adding a second
+        .Renviron at the ThinkBayes2 root with the same line as the one in
+        math552_labs/. Two files to keep in sync now, not a structural fix.
+    (2) here() resolving to the wrong root, so
+        here::here("Images", "Bayes_updating.png") pointed at the
+        ThinkBayes2 root instead of math552_labs/: initially tried
+        here::i_am("math552_lab02_bayesian-updating_v02.Rmd") in the setup
+        chunk, on the theory it would pin the root regardless of working
+        directory. That was wrong -- i_am() still depends on being able to
+        find a project marker by walking up from the working directory, and
+        it failed outright ("Could not find associated project") while the
+        session's working directory was ThinkBayes2. The actual fix was
+        structural: open math552_labs (not ThinkBayes2) as its own
+        folder/workspace in Positron, so the R session's working directory
+        matches what RStudio was already doing when it opens
+        math552_labs.Rproj directly. Once that was fixed, both plain
+        here::here() and here::i_am() resolve correctly -- i_am() is being
+        kept in the setup chunk since it now works and adds an explicit
+        check rather than silent wrong-root resolution, but it was not
+        itself the fix.
+2026-07-16: POTENTIAL NEXT STEP (not implemented): factor the color/box
+  definitions out of each lecture file's header-includes into one shared
+  .tex snippet, included by reference, so the box-to-color mapping stays
+  consistent across the whole semester's notes instead of being copy-pasted
+  (and potentially drifting) file to file.
+
+**AI Usage Notification:** Edits to code were iteratively conducted using Claude
+  models in Cowork mode -- cjt retains authorship and responsibility for all
+  changes to code and comments.
+-->
+
+```{r setup, include=FALSE}
+library(reticulate)
+library(here)
+
+# Pin here()'s root to this file's own folder, regardless of which
+# directory the R session actually started in (see CHANGELOG below).
+here::i_am("math552_lab02_bayesian-updating_v02.Rmd")
+
+# Python interpreter is machine-specific, so it is intentionally NOT
+# hardcoded here (see CHANGELOG above). Each user sets RETICULATE_PYTHON
+# in their own local .Renviron file in the project root; reticulate reads
+# it automatically on startup.
+if (Sys.getenv("RETICULATE_PYTHON") == "") {
+  stop(
+    "RETICULATE_PYTHON is not set.\n",
+    "Add this line to a .Renviron file in the project root, then restart R:\n\n",
+    "  RETICULATE_PYTHON=/path/to/your/python\n\n",
+    "See .Renviron (template) in this folder for an example."
+  )
+}
+
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+## Bayesian Updating
+
+The focus of this lecture is to show you how to update your prior beliefs as new
+information becomes available.  In Bayesian statistics, we no longer treat
+probability as a fixed quantity, rather we think of it more as a measure of how
+uncertain we are about an unknown parameter or hypothesis.
+
+The following diagram outlines the process.
+
+```{r bayes-updating-fig, echo=FALSE, out.width="75%", fig.align="center"}
+knitr::include_graphics(here::here("Images", "Bayes_updating.png"))
+```
+
+Our focus with regards to Bayesian updating will be to treat it as an algorithm
+rather than a formula. Given a prior distribution and a probabilistic model
+describing how the data are generated (the likelihood), we will learn how to
+update our beliefs one observation at a time.
+
+\begin{keyidea}
+Think of Bayesian updating as a recursive algorithm: today's posterior becomes
+tomorrow's prior.
+\end{keyidea}
+
+
+\begin{keyidea}
+Bayesian inference is fundamentally an iterative process of learning from
+evidence.
+\end{keyidea}
+
+\begin{warningbox}
+Bayesian updating does not require us to store the entire data set. After each
+observation, the posterior distribution summarizes everything learned from all
+previous observations. The posterior becomes the prior for the next update.
+\end{warningbox}
+
+## Distributions
+
+In probability theory, we define a **distribution** as a set of possible
+outcomes and their probabilities.  If the set of outcomes is either *finite* or
+*countable* we can describe our distribution with something called a
+**probability mass function (PMF)**.
+
+\begin{examplebox}
+Consider the flipping of a balanced or fair coin (i.e. Pr(Head)=0.5). The PMF
+is:
+\end{examplebox}
+
+
+|Outcome|Prob|
+|:--:|:--:|
+|Heads|0.5|
+|Tails|0.5|
+
+```{python}
+from empiricaldist import Pmf
+
+coin = Pmf()
+coin['heads'] = 1/2
+coin['tails'] = 1/2
+print(coin)
+```
+
+\begin{examplebox}
+A slightly more complicated example is the PMF for the sum obtained when rolling
+two fair six-sided dice.
+\end{examplebox}
+
+
+```{python}
+from collections import Counter
+import pandas as pd
+
+# Generate the sums for all 36 equally likely outcomes
+rolls = [d1 + d2
+         for d1 in range(1, 7)
+         for d2 in range(1, 7)]
+
+# Count occurrences of each sum
+counts = Counter(rolls)
+
+# Convert to a PMF
+pmf = pd.DataFrame({
+    'Count': [counts[s] for s in range(2, 13)],
+    'Probability': [counts[s]/36 for s in range(2, 13)]
+}, index=range(2, 13))
+
+pmf.index.name = "Sum"
+
+print(pmf)
+```
+
+
+\begin{definitionbox}
+A probability mass function (PMF) assigns probabilities to each possible value
+of a discrete random variable. The probabilities are nonnegative and sum to one.
+\end{definitionbox}
+
+\begin{definitionbox}
+The likelihood measures how probable the observed data are under each competing
+hypothesis.
+\end{definitionbox}
+
+## Cookie Problem (revisited)
+
+\begin{examplebox}
+Cookie Bowl Example (Revisited)
+
+\begin{itemize}
+\item Bowl 1 contains 75\% vanilla and 25\% chocolate cookies.
+\item Bowl 2 contains 50\% vanilla and 50\% chocolate cookies.
+\item One bowl is selected at random.
+\item Cookies are observed one at a time, updating our beliefs after each observation.
+\end{itemize}
+\end{examplebox}
+
+```{python}
+prior = Pmf.from_seq(['Bowl 1','Bowl 2'])
+print(prior)
+```
+
+This distribution is called the **prior distribution**.
+
+If we want to update this distribution based on new data (i.e. vanilla cookie
+selected), we multiply the prior by the likelihood.
+
+The likelihood of drawing a vanilla cookie from Bowl 1 is 3/4 and the likelihood
+of drawing a vanilla cookie from Bowl 2 is 1/2.
+
+```{python}
+likelihood_vanilla = [0.75,0.5]
+posterior = prior * likelihood_vanilla
+print(posterior)
+```
+
+Noticed that these probabilities are unnormalized since the probabilities don't
+add up to 1.
+
+We can use the function normalize() to normalize the probabilities.
+
+```{python}
+posterior.normalize()
+```
+
+The multiplication step produces unnormalized posterior weights. Normalization
+divides each weight by their total so the probabilities sum to one.  Now when we
+print the posterior distribution the probabilities are normalized.
+
+```{python}
+print(posterior)
+```
+
+With the Pmf object, we are able to update again if more data is received.
+Suppose we put the first cookie back and draw again from the same bowl.  Suppose
+the second cookie is also vanilla.
+
+The updated posterior distribution would be:
+
+```{python}
+posterior *= likelihood_vanilla
+posterior.normalize()
+print(posterior)
+```
+
+\begin{keyidea}
+The posterior distribution summarizes everything we have learned from the data
+observed so far.
+
+Once the posterior has been computed, the previous observations no longer need
+to be stored individually. The posterior becomes the prior for the next
+observation, making Bayesian updating a recursive learning algorithm.
+\end{keyidea}
+
+Now suppose we draw again and get a chocolate cookie?
+
+```{python}
+likelihood_chocolate = [0.25,0.5]
+posterior *= likelihood_chocolate
+posterior.normalize()
+print(posterior)
+```
+
+Now, let's take the updating one step further.  Suppose we continue drawing
+cookies in the same manner (i.e. with replacement) and keep updating the
+posterior distribution.
+
+Rather than updating the posterior manually after each observation, we can
+automate the recursive updating process with a simple loop.
+
+\begin{keyidea}
+Bayesian updating is a recursive algorithm. At each step, the current posterior
+summarizes all previous information and becomes the prior for the next update.
+\end{keyidea}
+
+```{python}
+from empiricaldist import Pmf
+import random
+random.seed(8675309)
+
+# -----------------------------
+# Prior probabilities
+# -----------------------------
+prior = Pmf([0.5, 0.5], ["Bowl 1", "Bowl 2"])
+
+# Assume Bowl 1 is the true bowl
+n = 100
+
+# Generate a random sequence of observed cookies
+cookies = random.choices(
+    population=["vanilla", "chocolate"],
+    weights=[0.75, 0.25],
+    k=n
+)
+
+posterior = prior.copy()
+history = []
+
+for cookie in cookies:
+
+    if cookie == "vanilla":
+        likelihood = {"Bowl 1": 0.75,
+                      "Bowl 2": 0.50}
+    else:
+        likelihood = {"Bowl 1": 0.25,
+                      "Bowl 2": 0.50}
+
+    # Bayes update
+    for bowl in posterior.index:
+        posterior[bowl] *= likelihood[bowl]
+
+    _ = posterior.normalize() # _ suppresses printing
+
+    history.append(posterior["Bowl 1"])
+```
+
+```{python, echo=TRUE, results='hide'}
+import matplotlib.pyplot as plt
+
+# Plot the posterior probability after each observation
+fig, ax = plt.subplots(figsize=(8,4))
+
+ax.plot(range(1, n+1), history, linewidth=2)
+
+ax.set_xlabel("Number of Cookies Observed")
+ax.set_ylabel(r"$P(\mathrm{Bowl\ 1}\mid\mathrm{Data})$")
+ax.set_title("Bayesian Updating as Data Accumulate")
+
+ax.grid(True)
+
+plt.show()
+```
+
+Every vanilla cookie increases the odds in favor of Bowl 1 by a factor of 1.5,
+while every chocolate cookie decreases the odds by a factor of 0.5. Since Bowl 1
+generates vanilla cookies much more frequently than chocolate cookies, the
+cumulative evidence overwhelmingly favors Bowl 1, causing the posterior
+probability to approach 1.
+
+If you draw a vanilla cookie the likelihood ratio is 1.5.
+
+$$\frac{P(V|\text{Bowl 1})}{P(V|\text{Bowl 2})}=\frac{0.75}{0.5}=1.5$$
+
+If you observe a chocolate cookie, the likelihood ratio is 0.5.
+
+$$\frac{P(C|\text{Bowl 1})}{P(C|\text{Bowl 2})}=\frac{0.25}{0.5}=0.5$$
+
+Bowl 1 produces many more vanilla cookies than chocolate cookies.
+
+What would happen if the vanilla and chocolate cookies in each bowl were the
+same.
+
+To test this, I make the weights equal:
+
+```text
+# Generate a random sequence of observed cookies
+cookies = random.choices(
+    population=["vanilla", "chocolate"],
+    weights=[0.5, 0.5],
+    k=n
+)
+```
+
+```{python,echo=FALSE,results='hide'}
+from empiricaldist import Pmf
+import random
+random.seed(8675309)
+
+# -----------------------------
+# Prior probabilities
+# -----------------------------
+prior = Pmf([0.5, 0.5], ["Bowl 1", "Bowl 2"])
+
+# Assume Bowl 1 is the true bowl
+n = 100
+
+# Generate a random sequence of observed cookies
+cookies = random.choices(
+    population=["vanilla", "chocolate"],
+    weights=[0.5, 0.5],
+    k=n
+)
+
+posterior = prior.copy()
+history = []
+
+for cookie in cookies:
+
+    if cookie == "vanilla":
+        likelihood = {"Bowl 1": 0.75,
+                      "Bowl 2": 0.50}
+    else:
+        likelihood = {"Bowl 1": 0.25,
+                      "Bowl 2": 0.50}
+
+    # Bayes update
+    for bowl in posterior.index:
+        posterior[bowl] *= likelihood[bowl]
+
+    _ = posterior.normalize() # _ suppresses printing
+
+    history.append(posterior["Bowl 1"])
+
+import matplotlib.pyplot as plt
+
+# Plot the posterior probability after each observation
+fig, ax = plt.subplots(figsize=(8,4))
+
+ax.plot(range(1, n+1), history, linewidth=2)
+
+ax.set_xlabel("Number of Cookies Observed")
+ax.set_ylabel(r"$P(\mathrm{Bowl\ 1}\mid\mathrm{Data})$")
+ax.set_title("Bayesian Updating as Data Accumulate")
+
+ax.grid(True)
+
+plt.show()
+```
+
+Here the data are generated from a 50/50 bowl, the same distribution as Bowl 2.
+Consequently, the evidence increasingly favors Bowl 2, causing the posterior
+probability of Bowl 1 to approach zero.
+
+## Summary
+
+In this lecture, we introduced Bayesian updating as a recursive process for
+learning from data. Beginning with a prior distribution, we incorporated new
+observations one at a time to obtain an updated posterior distribution. We saw
+that the posterior becomes the prior for the next observation, allowing our
+beliefs to evolve as additional evidence accumulates.
+
+Using probability mass functions and the cookie bowl example, we demonstrated
+that Bayesian inference is both conceptually intuitive and computationally
+straightforward and naturally suited to sequential learning.
+
+In the next lecture, we will take a closer look at the two ingredients that
+drive this updating process—the prior distribution and the likelihood—and
+examine how they combine to determine the posterior distribution.
+
+\begin{keyidea}
+Bayesian inference is not about making a single calculation, it's about
+continuously updating our beliefs as new evidence becomes available.
+\end{keyidea}
+
+
