@@ -1,0 +1,38 @@
+{
+    "cSpell.words": [
+        "bfseries",
+        "boxrule",
+        "colback",
+        "colframe",
+        "Cowork",
+        "definecolor",
+        "definitionbox",
+        "empiricaldist",
+        "examplebox",
+        "figsize",
+        "fonttitle",
+        "getenv",
+        "keyidea",
+        "knitr",
+        "mathrm",
+        "matplotlib",
+        "newtcolorbox",
+        "Okabe",
+        "pyplot",
+        "Renviron",
+        "Rproj",
+        "tcolorbox",
+        "usepackage",
+        "warningbox",
+        "wongblue",
+        "wonggreen",
+        "wongorange",
+        "wongvermillion",
+        "xelatex",
+        "xlabel",
+        "ylabel"
+    ],
+    "cSpell.ignoreWords": [
+        "nmeth"
+    ]
+}

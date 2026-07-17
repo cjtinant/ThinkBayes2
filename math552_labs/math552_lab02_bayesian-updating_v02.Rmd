@@ -118,13 +118,13 @@ CHANGELOG (v02, working copy — cjt)
     Key Takeaway            -> #E69F00 (orange)
     Definition              -> #0072B2 (blue)
     Example                 -> #009E73 (bluish green)
-    Important Distinction   -> #D55E00 (vermillion)
+    Important Distinction   -> #D55E00 (vermilion)
 2026-07-16: Fixed two related errors when knitting in Positron (worked fine
   in RStudio). Root cause for both: R only reads .Renviron from the working
   directory at session *startup*, and Positron's R session appears to start
   in the ThinkBayes2 root rather than math552_labs/ (confirmed via
   here()'s own "here() starts at ..." message pointing at the wrong
-  folder). RStudio doesn't hit this because opening math552_labs.Rproj
+  folder). RStudio doesn't hit this because opening math552_labs. Rproj
   directly starts R with math552_labs/ as the working directory.
     (1) RETICULATE_PYTHON not set: fixed pragmatically by adding a second
         .Renviron at the ThinkBayes2 root with the same line as the one in
